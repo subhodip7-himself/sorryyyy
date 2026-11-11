@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Actually I have a question...</title>
+<style>
+  /* Page layout */
+  html,body {
+    height: 100%;
+    margin: 0;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    background: linear-gradient(135deg,#ffe6f0 0%, #fff6e6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Card / container */
+  .card {
+    width: min(760px, 92vw);
+    min-height: 360px;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.12);
+    padding: 36px;
+    position: relative; /* for absolute-positioned buttons inside */
+    overflow: hidden;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 6px 0 10px;
+    font-size: 2.0rem;
+    letter-spacing: .4px;
+    color: #ff2e6f;
+  }
+
+  p.lead {
+    margin: 0 0 28px;
+    color: #333;
+    font-size: 1.05rem;
+  }
+
+  /* Button area where the buttons will float */
+  .btn-area {
+    position: relative;
+    height: 160px;
+    margin-top: 12px;
+  }
+
+  /* Shared button style */
+  .btn {
+    position: absolute; /* placed by JS */
+    padding: 14px 22px;
+    border-radius: 999px;
+    border: none;
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    user-select: none;
+    transition: transform .18s ease, box-shadow .18s ease;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    touch-action: manipulation;
+  }
+
+  /* Yes button */
+  #yesBtn {
+    background: linear-gradient(180deg,#ff6aa9,#ff3b7a);
+    color: white;
+    left: 50%;
+    top: 50%;
+    transform: translate(-120%, -50%); /* left of center */
+  }
+
+  /* No button */
+  #noBtn {
+    background: linear-gradient(180deg,#e6e6e6,#cfcfcf);
+    color: #222;
+    left: 50%;
+    top: 50%;
+    transform: translate(20%, -50%); /* right of center initially */
+  }
+
+  /* Button hover/focus micro-animations */
+  .btn:active { transform: scale(.98) translateY(1px); }
+  #yesBtn:hover { transform: translate(-120%, -50%) scale(1.03); }
+  #noBtn:hover { transform: translate(20%, -50%) scale(1.03); }
+
+  /* Modal shown after YES */
+  .modal {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    background: rgba(255,255,255,0.6);
+  }
+
+  .modal .content {
+    background: white;
+    padding: 26px 28px;
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.14);
+    text-align: center;
+  }
+
+  .heart {
+    font-size: 2.6rem;
+    color: #ff2e6f;
+    margin-bottom: 10px;
+  }
+
+  /* Small responsive tweak */
+  @media (max-width:480px) {
+    h1 { font-size: 1.6rem; }
+    .btn { padding: 12px 18px; font-size: 0.95rem; }
+    .btn-area { height: 180px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <h1>Aar raag kore thakis naa please...</h1>
+  <p class="lead">Actually first time to ektu nervous chilam... <br>But toke sottie khub sundor lagchilo <br>Samna samni bolte parini but yeah its true <br>So please arr raag kore thakis naa 💖</p>
+
+  <div class="btn-area" id="area">
+    <button id="yesBtn" class="btn">YES</button>
+    <button id="noBtn" class="btn" aria-label="No button">NO</button>
+
+    <div class="modal" id="modal">
+      <div class="content">
+        <div class="heart">💗</div>
+        <h2>Jantam tui aar raag kore thaktei parbi naah !!</h2>
+        <p>Next time theke sob mone thakbe✨🫂<br>Ar haa Ice-Cream taao due roilo<br>Ar ebar please chobi gulo o pathiyee daaaaooooo🥺<br>heheheheheheheheheheee....</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/*
+ Behavior:
+ - When pointer enters the NO button or when a touchstart happens on it, it moves to a new random location inside the .btn-area.
+ - The YES button stays fixed.
+ - We ensure NO doesn't overlap YES and stays fully inside container.
+*/
+
+(function () {
+  var noBtn = document.getElementById('noBtn');
+  var yesBtn = document.getElementById('yesBtn');
+  var area = document.getElementById('area');
+  var modal = document.getElementById('modal');
+
+  // Place buttons initially by reading their CSS transforms (we already set positions in CSS),
+  // but for movement we'll use top/left as px values relative to the area.
+  // Initialize positions: center-left and center-right like the CSS suggested
+  function initPositions() {
+    var areaRect = area.getBoundingClientRect();
+    // place yes at 25% width, 50% height
+    var yesLeft = Math.round(areaRect.width * 0.25 - yesBtn.offsetWidth / 2);
+    var yesTop  = Math.round(areaRect.height * 0.5  - yesBtn.offsetHeight / 2);
+    yesBtn.style.left = yesLeft + 'px';
+    yesBtn.style.top  = yesTop  + 'px';
+    yesBtn.style.transform = 'none';
+
+    // place no at 75% width, 50% height
+    var noLeft = Math.round(areaRect.width * 0.75 - noBtn.offsetWidth / 2);
+    var noTop  = yesTop;
+    noBtn.style.left = noLeft + 'px';
+    noBtn.style.top  = noTop  + 'px';
+    noBtn.style.transform = 'none';
+  }
+
+  // Check if two rects overlap
+  function rectsOverlap(a, b) {
+    return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+  }
+
+  // Move NO button to a random safe location
+  function moveNoButton() {
+    var areaRect = area.getBoundingClientRect();
+    var yesRect = yesBtn.getBoundingClientRect();
+    var btnW = noBtn.offsetWidth;
+    var btnH = noBtn.offsetHeight;
+
+    // Available range within area (relative coords)
+    var minX = 0;
+    var minY = 0;
+    var maxX = Math.max(0, areaRect.width - btnW);
+    var maxY = Math.max(0, areaRect.height - btnH);
+
+    // try several times to find a position that doesn't overlap YES
+    var attempts = 0;
+    var chosen = null;
+    while (attempts < 50) {
+      attempts++;
+      var x = Math.floor(Math.random() * (maxX + 1));
+      var y = Math.floor(Math.random() * (maxY + 1));
+
+      // convert to viewport rect-like object for overlap test
+      var candidateRect = {
+        left: areaRect.left + x,
+        top: areaRect.top + y,
+        right: areaRect.left + x + btnW,
+        bottom: areaRect.top + y + btnH
+      };
+
+      if (!rectsOverlap(candidateRect, yesRect)) {
+        chosen = {x:x, y:y};
+        break;
+      }
+    }
+
+    // If couldn't find non-overlapping spot after tries, just pick a random spot (so game is still fun)
+    if (!chosen) {
+      chosen = {
+        x: Math.floor(Math.random() * (maxX + 1)),
+        y: Math.floor(Math.random() * (maxY + 1))
+      };
+    }
+
+    // Move with a small transform animation effect
+    noBtn.style.transition = 'left 0.18s ease, top 0.18s ease';
+    noBtn.style.left = chosen.x + 'px';
+    noBtn.style.top  = chosen.y + 'px';
+  }
+
+  // Event handlers that trigger move
+  function onPointerEnterNo(e) {
+    // Only move if it's pointer (mouse/finger) actually entering
+    moveNoButton();
+  }
+
+  // Touch devices sometimes fire touchstart without pointerenter; handle both.
+  function onTouchStartNo(e) {
+    e.preventDefault(); // prevent triggering a click
+    moveNoButton();
+  }
+
+  // Prevent NO from being clicked easily
+  noBtn.addEventListener('click', function (ev) {
+    ev.preventDefault();
+    moveNoButton();
+  });
+
+  // Pointer events (covers mouse and pen)
+  noBtn.addEventListener('pointerenter', onPointerEnterNo);
+  noBtn.addEventListener('pointerdown', onPointerEnterNo); // when pressing but not yet moved away
+
+  // Touch fallback
+  noBtn.addEventListener('touchstart', onTouchStartNo, {passive:false});
+
+  // When YES clicked show modal (you can customize)
+  yesBtn.addEventListener('click', function () {
+    modal.style.display = 'flex';
+    // optional: temporarily disable NO movement so they can enjoy the moment
+    noBtn.removeEventListener('pointerenter', onPointerEnterNo);
+    noBtn.removeEventListener('pointerdown', onPointerEnterNo);
+    noBtn.removeEventListener('touchstart', onTouchStartNo);
+  });
+
+  // Recalculate layout on resize (so buttons stay inside on orientation change)
+  window.addEventListener('resize', function () {
+    // small timeout to allow layout changes to settle
+    setTimeout(initPositions, 120);
+  });
+
+  // Start positions after fonts/layout compute
+  window.addEventListener('load', initPositions);
+  // Also init now in case load fired already
+  initPositions();
+})();
+</script>
+</body>
+</html>
